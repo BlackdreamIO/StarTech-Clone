@@ -1,11 +1,12 @@
 import { MongoDB } from '@/databases/mongoDb';
 import { NextRequest, NextResponse } from 'next/server';
+import { Product } from '@/scheme/Product';
 
-export default async function GET(req : NextRequest, res : NextResponse) 
+export async function GET(req : NextRequest, res : NextResponse) 
 {
-    await MongoDB();
+    const mongoDb = await MongoDB().then((res) => 'db connected').catch((err) => `failed to connect db ${err}`);
 
-    const products = productSchema.find({ });
+    const products = Product.find({  });
 
-    NextResponse.json(products);
+    return NextResponse.json({ status : mongoDb, data : products });
 }
