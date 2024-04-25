@@ -1,26 +1,15 @@
-import { MongoClient, ServerApiVersion } from 'mongodb';
-import mongoose from 'mongoose';
+import { MongoClient, Db } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || '';
+export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+  const uri = process.env.MONGODB_URI || '';
+  const client = new MongoClient(uri);
 
-const connection : { isConnected? : number } = {};
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-export const client = new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    }
-});
-
-export async function MongoDB() 
-{
-    if(connection.isConnected) {
-        return;
-    }
-
-    const db = await mongoose.connect(uri);
-
-    connection.isConnected = db.connections[0].readyState;
+  try {
+    await client.connect();
+    const db = client.db();
+    return { client, db };
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+    throw new Error('Could not connect to the database');
+  }
 }
